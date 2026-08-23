@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NihalFlix - Live TV</title>
+    
+    <!-- Google Fonts & HLS Video Player -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #141414;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 5%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(20,20,20,0.7) 100%);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            border-bottom: 1px solid #222;
+        }
+
+        .logo {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 32px;
+            letter-spacing: 2px;
+            color: #E50914;
+            cursor: pointer;
+            text-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links span {
+            font-size: 14px;
+            color: #b3b3b3;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav-links span.active, .nav-links span:hover {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px 4%;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+
+        /* Category Filter */
+        .category-pills {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            scrollbar-width: none;
+        }
+
+        .category-pills::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill {
+            background: #262626;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .pill.active, .pill:hover {
+            background: #E50914;
+            color: #fff;
+            border-color: #E50914;
+            font-weight: 600;
+        }
+
+        /* Channels Grid */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .channel-card {
+            background: #1f1f1f;
+            border-radius: 8px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #2e2e2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-4px);
+            border-color: #E50914;
+            box-shadow: 0 6px 18px rgba(229, 9, 20, 0.25);
+        }
+
+        .channel-card img {
+            width: 100%;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .channel-card p {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f0f0f0;
+            margin: 0;
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            padding: 25px 20px;
+            margin-top: 40px;
+            border-top: 1px solid #222;
+            background-color: #0d0d0d;
+        }
+
+        .copyright-text {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .disclaimer-btn {
+            background: transparent;
+            color: #E50914;
+            border: 1px solid #E50914;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .disclaimer-btn:hover {
+            background: #E50914;
+            color: #fff;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #181818;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 850px;
+            position: relative;
+            padding: 16px;
+            border: 1px solid #333;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.9);
+        }
+
+        .legal-modal {
+            max-width: 600px;
+            padding: 25px;
+        }
+
+        .legal-heading {
+            font-size: 18px;
+            color: #E50914;
+            margin-bottom: 15px;
+            padding-right: 30px;
+        }
+
+        .legal-body p {
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            background: #E50914;
+            border-color: #E50914;
+        }
+
+        .player-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 25px;
+        }
+
+        .player-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .stream-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding: 0 4px;
+        }
+
+        #current-channel-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .live-badge {
+            background-color: #E50914;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                display: none;
+            }
+            .channel-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="navbar">
+        <div class="logo">NIHALFLIX</div>
+        <div class="nav-links">
+            <span class="active">Live TV</span>
+            <span>News</span>
+            <span>Entertainment</span>
+            <span>Music</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <h3 class="section-title">Explore Live Channels</h3>
+        
+        <div class="category-pills">
+            <button class="pill active" onclick="filterChannels('All')">All</button>
+            <button class="pill" onclick="filterChannels('News')">News</button>
+            <button class="pill" onclick="filterChannels('Entertainment')">Entertainment</button>
+            <button class="pill" onclick="filterChannels('Music')">Music</button>
+        </div>
+
+        <div id="channel-grid" class="channel-grid"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p class="copyright-text">© Copyright 2026-40 Nihal Pictures Entertainment. All Rights Reserved.</p>
+        <button class="disclaimer-btn" onclick="openDisclaimer()">Disclaimer</button>
+    </footer>
+
+    <!-- Video Modal -->
+    <div id="player-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closePlayer()">✕</button>
+            <div class="player-container">
+                <video id="video-player" controls playsinline></video>
+            </div>
+            <div class="stream-info">
+                <h2 id="current-channel-title">Channel Name</h2>
+                <span class="live-badge">● LIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal Disclaimer Modal -->
+    <div id="disclaimer-modal" class="modal">
+        <div class="modal-content legal-modal">
+            <button class="close-btn" onclick="closeDisclaimer()">✕</button>
+            <h2 class="legal-heading">Legal Disclaimer & Notice</h2>
+            <div class="legal-body">
+                <p><strong>Nihal Pictures Entertainment</strong> operates <strong>NihalFlix</strong> strictly as an indexing media player platform.</p>
+                <p>NihalFlix does not host, stream, broadcast, or upload any copyrighted media files or video streams. All stream links (.m3u8) displayed on this website are publicly available across the internet on third-party servers.</p>
+                <p>All channel logos, trademarks, and content rights belong solely to their respective broadcast networks. Nihal Pictures Entertainment assumes no liability or ownership for external broadcast content.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const channels = [
+            {
+                name: "9XM",
+                category: "Music",
+                logo: "https://i.postimg.cc/VLkPx70W/9xm-logo.webp",
+                url: "https://9xjio.wiseplayout.com/9XM/master.m3u8"
+            },
+            {
+                name: "DD News",
+                category: "News",
+                logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/DD_News_Logo.svg/512px-DD_News_Logo.svg.png",
+                url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8387978149653779525092e4745da19b010/sub-ddnews/master.m3u8"
+            },
+            {
+                name: "DD National",
+                category: "Entertainment",
+                logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/DD_National_logo.svg/512px-DD_National_logo.svg.png",
+                url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8387978149653779525092e4745da19b010/sub-ddnational/master.m3u8"
+            },
+            {
+                name: "DD Bharati",
+                category: "Entertainment",
+                logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/DD_Bharati_logo.svg/512px-DD_Bharati_logo.svg.png",
+                url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8387978149653779525092e4745da19b010/sub-ddbharati/master.m3u8"
+            }
+        ];
+
+        const video = document.getElementById('video-player');
+        const channelTitle = document.getElementById('current-channel-title');
+        const grid = document.getElementById('channel-grid');
+        const playerModal = document.getElementById('player-modal');
+        const disclaimerModal = document.getElementById('disclaimer-modal');
+        let hls = new Hls();
+
+        function openPlayer(url, title) {
+            channelTitle.innerText = title;
+            playerModal.classList.add('active');
+
+            if (Hls.isSupported()) {
+                hls.destroy();
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    video.play();
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.addEventListener('loadedmetadata', function () {
+                    video.play();
+                });
+            }
+        }
+
+        function closePlayer() {
+            playerModal.classList.remove('active');
+            video.pause();
+            if (Hls.isSupported()) {
+                hls.destroy();
+            }
+            video.src = "";
+        }
+
+        function openDisclaimer() {
+            disclaimerModal.classList.add('active');
+        }
+
+        function closeDisclaimer() {
+            disclaimerModal.classList.remove('active');
+        }
+
+        function renderChannels(channelList) {
+            grid.innerHTML = '';
+            channelList.forEach(function(channel) {
+                const card = document.createElement('div');
+                card.className = 'channel-card';
+                card.innerHTML = `
+                    <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/150x80/222/fff?text=${encodeURIComponent(channel.name)}'">
+                    <p>${channel.name}</p>
+                `;
+                card.onclick = function() {
+                    openPlayer(channel.url, channel.name);
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function filterChannels(category) {
+            const pills = document.querySelectorAll('.pill');
+            pills.forEach(function(p) {
+                p.classList.remove('active');
+                if (p.innerText.trim().toLowerCase() === category.toLowerCase()) {
+                    p.classList.add('active');
+                }
+            });
+
+            if (category === 'All') {
+                renderChannels(channels);
+            } else {
+                const filtered = channels.filter(function(c) {
+                    return c.category.toLowerCase() === category.toLowerCase();
+                });
+                renderChannels(filtered);
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target === playerModal) {
+                closePlayer();
+            }
+            if (event.target === disclaimerModal) {
+                closeDisclaimer();
+            }
+        };
+
+        // Render on page load
+        renderChannels(channels);
+    </script>
+</body>
+</html>
