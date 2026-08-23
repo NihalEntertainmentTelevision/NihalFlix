@@ -321,6 +321,7 @@
             <span class="active">Live TV</span>
             <span>News</span>
             <span>Entertainment</span>
+            <span>Movies</span>
             <span>Music</span>
         </div>
     </header>
@@ -331,9 +332,11 @@
         
         <div class="category-pills">
             <button class="pill active" onclick="filterChannels('All')">All</button>
-            <button class="pill" onclick="filterChannels('News')">News</button>
             <button class="pill" onclick="filterChannels('Entertainment')">Entertainment</button>
+            <button class="pill" onclick="filterChannels('Movies')">Movies</button>
             <button class="pill" onclick="filterChannels('Music')">Music</button>
+            <button class="pill" onclick="filterChannels('News')">News</button>
+            <button class="pill" onclick="filterChannels('Sports')">Sports</button>
         </div>
 
         <div id="channel-grid" class="channel-grid"></div>
@@ -385,18 +388,6 @@
                 category: "Entertainment",
                 logo: "https://i.postimg.cc/6pphdmbR/DD-National-2017.webp",
                 url: "https://d3qs3d2rkhfqrt.cloudfront.net/out/v1/40492a64c1db4a1385ba1a397d357d3a/index.m3u8"
-            },
-            {
-                name: "DD News",
-                category: "News",
-                logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/DD_News_Logo.svg/512px-DD_News_Logo.svg.png",
-                url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8387978149653779525092e4745da19b010/sub-ddnews/master.m3u8"
-            },
-            {
-                name: "DD Bharati",
-                category: "Entertainment",
-                logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/DD_Bharati_logo.svg/512px-DD_Bharati_logo.svg.png",
-                url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8387978149653779525092e4745da19b010/sub-ddbharati/master.m3u8"
             }
         ];
 
